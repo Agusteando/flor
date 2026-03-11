@@ -1,16 +1,11 @@
-name: FLOR
-script: .output/server/index.mjs
-env:
-  NODE_ENV: production
-  PORT: 2345
-
 import mysql from 'mysql2/promise';
-import { useRuntimeConfig } from '#imports';
 
 let pool;
 
 export const getPool = () => {
   if (pool) return pool;
+  
+  // useRuntimeConfig is auto-imported by Nitro
   const config = useRuntimeConfig();
   
   pool = mysql.createPool({

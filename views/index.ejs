@@ -1,380 +1,5 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title><%= meta.title %></title>
-
-  <meta property="og:title" content="<%= meta.title %>" />
-  <meta property="og:description" content="<%= meta.description %>" />
-  <meta property="og:image" content="<%= meta.image %>" />
-
-  <!-- Bootstrap -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" />
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-  <!-- Google Fonts: Plus Jakarta Sans (Excellent for legibility and modern look) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-
-  <style>
-    :root {
-      /* Palette: Elegant Dark Mode (Navy/Slate base instead of pure black) */
-      --bg-body: #0b0d11;
-      --bg-surface: #151922;
-      --bg-surface-elevated: #1e2330;
-      
-      /* Typography & Contrast */
-      --text-main: #ffffff;
-      --text-muted: #94a3b8; /* Cool gray, high legibility */
-      --font-stack: 'Plus Jakarta Sans', sans-serif;
-      
-      /* Accents: Gold/Amber for high visibility and elegance */
-      --accent: #fbbf24; 
-      --accent-glow: rgba(251, 191, 36, 0.3);
-      --accent-secondary: #38bdf8; /* Sky blue */
-
-      /* Structural */
-      --radius-sm: 12px;
-      --radius-md: 20px;
-      --radius-lg: 28px;
-      --shadow-card: 0 10px 40px -10px rgba(0,0,0,0.7);
-      --border-subtle: 1px solid rgba(255,255,255,0.08);
-      
-      /* Sheet config */
-      --sheet-peek: 84px;
-      --sheet-expanded: 70vh;
-    }
-
-    /* --- Global Reset & Typography --- */
-    html, body {
-      height: 100%;
-      background-color: var(--bg-body);
-      /* Subtle gradient for depth */
-      background-image: radial-gradient(circle at 50% 0%, #1a202e 0%, var(--bg-body) 60%);
-      background-attachment: fixed;
-      font-family: var(--font-stack);
-      color: var(--text-main);
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    h1, h2, h3, h4, h5 { letter-spacing: -0.02em; }
-    
-    /* Improve focus visibility for sight issues */
-    :focus-visible {
-      outline: 3px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    .container-fluid {
-      max-width: 1400px;
-      padding-left: clamp(16px, 4vw, 32px);
-      padding-right: clamp(16px, 4vw, 32px);
-    }
-
-    /* --- Brand Header --- */
-    .brand-header {
-      position: relative;
-      padding: 40px 0 24px;
-    }
-    .brand-header img {
-      height: 90px;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
-      margin-bottom: 12px;
-    }
-    .brand-header h1 {
-      font-weight: 800;
-      font-size: clamp(22px, 5vw, 36px);
-      background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 20px rgba(0,0,0,0.5);
-      margin-top: 8px;
-    }
-
-    /* --- Floating Search Bar --- */
-    .search-wrap {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 10px 0 24px;
-      background: linear-gradient(180deg, var(--bg-body) 0%, rgba(11,13,17,0.95) 50%, rgba(11,13,17,0) 100%);
-      backdrop-filter: blur(2px);
-      pointer-events: none; /* Let clicks pass through transparent parts */
-    }
-    .search-wrap > div { pointer-events: auto; }
-
-    .search-input {
-      background: rgba(30, 35, 48, 0.7);
-      border: var(--border-subtle);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: #fff;
-      border-radius: 99px;
-      padding: 18px 24px;
-      font-size: 1.1rem;
-      font-weight: 500;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      transition: all 0.3s ease;
-    }
-    .search-input:focus {
-      background: #1e2330;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 2px var(--accent);
-      color: #fff;
-      outline: none;
-    }
-    .search-input::placeholder { color: var(--text-muted); opacity: 0.8; }
-    .search-icon {
-      position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
-      color: var(--accent); font-size: 1.25rem; pointer-events: none;
-    }
-
-    /* --- Video Cards (Professional & Tactile) --- */
-    .video-card {
-      position: relative;
-      background: var(--bg-surface);
-      border: var(--border-subtle);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      cursor: pointer;
-      box-shadow: var(--shadow-card);
-      transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.25s ease;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-    .video-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 50px -10px rgba(0,0,0,0.8);
-      border-color: rgba(255,255,255,0.2);
-    }
-    .video-card:active { transform: scale(0.98); }
-
-    .video-thumb {
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: #000;
-      position: relative;
-      overflow: hidden;
-    }
-    .video-thumb img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform 0.6s ease;
-      opacity: 0.9;
-    }
-    .video-card:hover .video-thumb img { transform: scale(1.05); opacity: 1; }
-
-    /* The "Play" Badge - highly visible */
-    .play-badge {
-      position: absolute; right: 12px; bottom: 12px;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(255,255,255,0.15);
-      backdrop-filter: blur(8px);
-      padding: 8px 16px;
-      border-radius: 99px;
-      color: #fff;
-      font-weight: 700;
-      font-size: 0.9rem;
-      display: flex; align-items: center; gap: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
-    .play-badge i { color: var(--accent); }
-
-    .card-body-custom { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-    
-    .video-title {
-      font-weight: 700;
-      font-size: 1.15rem;
-      line-height: 1.35;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-    .video-summary {
-      font-size: 1rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    /* --- Pagination --- */
-    .pagination .page-item { margin: 0 4px; }
-    .pagination .page-link {
-      background: var(--bg-surface-elevated);
-      border: var(--border-subtle);
-      color: var(--text-muted);
-      border-radius: 12px !important;
-      font-weight: 700;
-      padding: 12px 18px;
-      font-size: 1.05rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-    .pagination .page-item.active .page-link {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-      box-shadow: 0 0 15px var(--accent-glow);
-    }
-    .pagination .page-item.disabled .page-link { opacity: 0.3; }
-
-    /* --- Modal (App-like view) --- */
-    .modal-content {
-      background: var(--bg-body);
-      border-radius: 0;
-      height: 100vh;
-      border: none;
-    }
-    .modal-header {
-      background: rgba(11, 13, 17, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      padding: 16px 20px;
-      z-index: 10;
-    }
-    .modal-title {
-      font-weight: 800;
-      font-size: 1.25rem;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    
-    .a11y-btn {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-weight: 700;
-      transition: background 0.2s;
-    }
-    .a11y-btn:active { background: rgba(255,255,255,0.2); }
-
-    .modal-body-wrapper {
-      background: var(--bg-body);
-    }
-
-    /* Video Area */
-    .video-area {
-      background: #000;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-      width: 100%; aspect-ratio: 16/9;
-    }
-    .video-area iframe { width: 100%; height: 100%; display: block; }
-
-    /* Buttons inside Modal */
-    .cta-row {
-      padding: 20px;
-      gap: 16px;
-    }
-    .cta {
-      border: none;
-      border-radius: 16px;
-      padding: 18px;
-      font-weight: 800;
-      font-size: 1.1rem;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.1s;
-    }
-    .cta:active { transform: scale(0.97); }
-    
-    .cta-primary {
-      background: var(--accent);
-      color: #1a1500;
-      box-shadow: 0 0 20px var(--accent-glow);
-    }
-    .cta-secondary {
-      background: var(--bg-surface-elevated);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #fff;
-    }
-
-    /* --- Bottom Sheet (The Summary) --- */
-    .sheet {
-      background: var(--bg-surface-elevated);
-      border-top: 1px solid rgba(255,255,255,0.1);
-      border-top-left-radius: var(--radius-lg);
-      border-top-right-radius: var(--radius-lg);
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
-    }
-    
-    .sheet-handle {
-      background: rgba(255,255,255,0.02);
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      padding: 14px 24px;
-    }
-    
-    .grabber { width: 48px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 4px; }
-    
-    .sheet-title { font-size: 1.1rem; color: #fff; }
-    .sheet-title .dot { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-
-    /* Markdown Styling - High Legibility */
-    .sheet-scroller { padding: 20px 24px 120px; } /* Extra padding bottom for safe scroll */
-    .md { 
-      font-size: 1.25rem; /* Larger base size for sight issues */
-      line-height: 1.7; 
-      color: #e2e8f0; 
-    }
-    .md h1, .md h2, .md h3 { color: #fff; margin-top: 1.2em; margin-bottom: 0.6em; }
-    .md p { margin-bottom: 1.2em; }
-    .md strong { color: var(--accent); }
-    .md blockquote {
-      border-left: 4px solid var(--accent);
-      background: rgba(251, 191, 36, 0.05);
-      padding: 16px;
-      border-radius: 8px;
-      font-style: italic;
-      color: #fff;
-    }
-    .md ul li { margin-bottom: 0.5em; list-style-type: square; }
-    
-    /* Navigation Arrows (Floating) */
-    .swipe-indicator .arrow {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.1);
-      width: 56px; height: 56px;
-      font-size: 1.4rem;
-    }
-    .swipe-indicator .arrow:active { background: var(--accent); color: #000; }
-
-    .page-pill {
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
-      font-variant-numeric: tabular-nums;
-      padding: 6px 16px;
-    }
-
-    /* Loader */
-    #loader {
-      background: var(--bg-body);
-      z-index: 9999;
-    }
-    
-    /* Desktop Improvements */
-    @media (min-width: 992px) {
-      .modal-dialog { max-width: 1200px; height: 90vh; margin: 5vh auto; }
-      .modal-content { border-radius: 24px; height: 100%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
-      .sheet { 
-        background: var(--bg-surface); 
-        border: 1px solid rgba(255,255,255,0.05);
-        border-radius: 16px;
-        height: 100%;
-      }
-      .sheet-scroller { padding-bottom: 40px; }
-      .video-area { border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-    }
-  </style>
-</head>
-<body>
-
-  <div id="loader">
+<template>
+  <div v-if="pending" id="loader">
     <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
     <div class="mt-3 text-muted font-weight-bold">Cargando biblioteca…</div>
   </div>
@@ -389,648 +14,658 @@
     <!-- Enhanced Search -->
     <div class="search-wrap">
       <div class="position-relative container-fluid px-0" style="max-width: 720px; margin: 0 auto;">
-        <input id="search-input" class="form-control search-input" type="search" inputmode="search" placeholder="¿Qué quieres aprender hoy?" autocomplete="off" aria-label="Buscar" />
+        <input 
+          v-model="searchText"
+          id="search-input" 
+          class="form-control search-input" 
+          type="search" 
+          inputmode="search" 
+          placeholder="¿Qué quieres aprender hoy?" 
+          autocomplete="off" 
+          aria-label="Buscar" 
+        />
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
       </div>
     </div>
 
     <div class="mt-4">
-      <div class="row" id="items-container" role="list"></div>
+      <div class="row" id="items-container" role="list">
+        <!-- Render Video Cards -->
+        <div class="col-12 col-sm-6 col-lg-4 mb-4" role="listitem" v-for="item in paginatedData" :key="item.id">
+          <div 
+            class="video-card h-100" 
+            tabindex="0" 
+            :aria-label="'Ver ' + (item.videoTitle || 'Video')"
+            @click.stop="openMediaModal(filteredData.indexOf(item))"
+            @keydown.enter="openMediaModal(filteredData.indexOf(item))"
+          >
+            <div class="video-thumb">
+              <img :src="getThumb(item)" alt="" loading="lazy" @error="handleImageError(item, $event)" />
+              <div class="play-badge">
+                <i class="fa-solid fa-play"></i><span>Reproducir</span>
+              </div>
+            </div>
+            <div class="card-body-custom">
+              <div class="video-title">{{ item.videoTitle || 'Sin título' }}</div>
+              <div class="video-summary text-truncate">
+                {{ formatSummary(item.summary) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="empty-state" class="text-center py-5" style="display:none; color: var(--text-muted);">
+    <!-- Empty State -->
+    <div v-if="filteredData.length === 0 && !pending" id="empty-state" class="text-center py-5" style="color: var(--text-muted);">
       <i class="fa-regular fa-folder-open mb-3" style="font-size:64px; opacity: 0.5;"></i>
       <h3 class="h5">No encontramos resultados</h3>
       <p>Intenta buscar con otras palabras.</p>
     </div>
 
-    <nav aria-label="Paginación" class="mt-5 pb-4">
-      <ul class="pagination justify-content-center flex-wrap" id="pagination"></ul>
+    <!-- Pagination -->
+    <nav v-if="filteredData.length > 0" aria-label="Paginación" class="mt-5 pb-4">
+      <ul class="pagination justify-content-center flex-wrap" id="pagination">
+        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+          <a class="page-link" href="#" @click.prevent="goToPage(1)">
+            <span class="sr-only">Primera</span>
+            <i class="fa-solid fa-chevron-left"></i>
+          </a>
+        </li>
+        <li 
+          class="page-item" 
+          v-for="p in visiblePages" 
+          :key="p"
+          :class="{ active: p === currentPage }"
+        >
+          <a class="page-link" href="#" @click.prevent="goToPage(p)">{{ p }}</a>
+        </li>
+        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+          <a class="page-link" href="#" @click.prevent="goToPage(totalPages)">
+            <span class="sr-only">Última</span>
+            <i class="fa-solid fa-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
     </nav>
   </div>
 
-  <div class="modal fade" id="mediaModal" tabindex="-1" role="dialog" aria-labelledby="mediaModalLabel" aria-hidden="true"></div>
+  <!-- Teleport the Modal to body -->
+  <Teleport to="body">
+    <div 
+      v-if="selectedItem" 
+      class="modal fade show" 
+      tabindex="-1" 
+      style="display: block; background: rgba(0,0,0,0.85);"
+      @click.self="closeModal"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div 
+          class="modal-content position-relative" 
+          :class="animationClass"
+          @touchstart="onTouchStart" 
+          @touchend="onTouchEnd"
+        >
+          <!-- Navigation Arrows inside Modal -->
+          <div class="swipe-indicator">
+             <button type="button" class="arrow left-arrow" aria-label="Anterior" @click="navigatePrev()">
+               <i class="fa-solid fa-chevron-left"></i>
+             </button>
+             <button type="button" class="arrow right-arrow" aria-label="Siguiente" @click="navigateNext()">
+               <i class="fa-solid fa-chevron-right"></i>
+             </button>
+          </div>
+          <div class="page-pill">
+            {{ currentItemIndex + 1 }} / {{ filteredData.length }}
+          </div>
 
-  <!-- Dependencies -->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const data = <%- JSON.stringify(data) %>;
-      const loader = document.getElementById('loader');
-
-      const USE_SYNTH_THUMBS = true;
-
-      /* ---------- 
-         Enhanced Synthetic Thumbnails 
-         Uses the new font and more professional gradients
-      ---------- */
-      const thumbCache = new Map();
-
-      function generateThumb(title) {
-        const key = (title || 'Conferencia').trim() || 'Conferencia';
-        if (thumbCache.has(key)) return thumbCache.get(key);
-
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const W = 640, H = 360;
-        const canvas = document.createElement('canvas');
-        canvas.width = W * dpr;
-        canvas.height = H * dpr;
-        const ctx = canvas.getContext('2d');
-        ctx.scale(dpr, dpr);
-
-        // More elegant, deep professional gradients
-        const palettes = [
-          ['#0f172a', '#1e293b'], // Slate
-          ['#1e1b4b', '#312e81'], // Indigo
-          ['#022c22', '#115e59'], // Teal
-          ['#3a0ca3', '#480ca8'], // Deep Purple
-          ['#450a0a', '#7f1d1d'], // Red Dark
-          ['#172554', '#1e40af']  // Blue
-        ];
-        const pal = palettes[hashCode(key) % palettes.length];
-
-        // Background
-        const grd = ctx.createLinearGradient(0,0,W,H);
-        grd.addColorStop(0, pal[0]); 
-        grd.addColorStop(1, pal[1]);
-        ctx.fillStyle = grd; ctx.fillRect(0,0,W,H);
-
-        // Subtle geometric texture
-        ctx.globalAlpha = 0.05; ctx.fillStyle = '#fff';
-        for(let i=0; i<W; i+=40) { ctx.fillRect(i, 0, 1, H); }
-        for(let i=0; i<H; i+=40) { ctx.fillRect(0, i, W, 1); }
-        ctx.globalAlpha = 1;
-
-        // Logo Mark (Simple circle in corner)
-        const cx = W - 60, cy = H - 60, r = 30;
-        ctx.fillStyle = 'rgba(255,255,255,0.1)'; 
-        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.beginPath();
-        // Play triangle
-        ctx.moveTo(cx-6, cy-10); ctx.lineTo(cx-6, cy+10); ctx.lineTo(cx+12, cy); ctx.fill();
-
-        // Text
-        const pad = 40, boxW = W - pad*2, maxLines = 3;
-        let fontSize = 42;
-        ctx.textBaseline = 'top';
-        // Use the new font
-        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-        
-        let wrapped = wrapLines(ctx, key, boxW, maxLines);
-        // Resize text to fit
-        while (wrapped.truncated && fontSize > 24) {
-          fontSize -= 2;
-          ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-          wrapped = wrapLines(ctx, key, boxW, maxLines);
-        }
-
-        // Draw text
-        const textH = wrapped.lines.length * (fontSize * 1.25);
-        const textY = (H - textH) / 2; // Center vertically
-
-        // Text shadow for readability
-        ctx.shadowColor="rgba(0,0,0,0.5)"; ctx.shadowBlur=20;
-        ctx.fillStyle = '#ffffff';
-        wrapped.lines.forEach((ln, i) => ctx.fillText(ln, pad, textY + i*(fontSize*1.25)));
-        ctx.shadowBlur=0;
-
-        const url = canvas.toDataURL('image/jpeg', 0.9); // JPEG for speed
-        thumbCache.set(key, url);
-        return url;
-      }
-      function hashCode(str){let h=0;for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i);h|=0}return Math.abs(h)}
-      function wrapLines(ctx, text, maxWidth, maxLines){
-        const words = text.split(/\s+/); const lines=[]; let curr='';
-        for (let i=0;i<words.length;i++){
-          const test = curr ? curr+' '+words[i] : words[i];
-          if (ctx.measureText(test).width <= maxWidth) curr = test;
-          else { if (curr) lines.push(curr); curr = words[i]; if (lines.length === maxLines-1) break; }
-        }
-        if (curr && lines.length < maxLines) lines.push(curr);
-        let truncated = (lines.join(' ') !== text);
-        if (lines.length === maxLines){
-          while (ctx.measureText(lines[lines.length-1] + '…').width > maxWidth && lines[lines.length-1].length) {
-            lines[lines.length-1] = lines[lines.length-1].slice(0,-1);
-          }
-          lines[lines.length-1] += '…';
-        }
-        return {lines, truncated};
-      }
-      /* ---------- /End Synthetic Thumbnails ---------- */
-
-      let currentPage = 1;
-      const itemsPerPage = 6;
-      let totalPages = 1;
-      let searchText = '';
-      let currentItemIndex = null;
-      let filteredData = [];
-
-      // Logic stays exactly the same as provided
-      loader.style.display = 'flex';
-
-      filteredData = filterData(data, searchText);
-      totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
-      renderItems();
-      renderPagination();
-
-      if (filteredData.length > 0) {
-        // Auto open first one if needed, otherwise comment out
-        openMediaModal(filteredData[0], 0);
-      } else {
-        loader.style.display = 'none';
-        document.getElementById('empty-state').style.display = 'block';
-      }
-
-      $('#mediaModal')
-        .on('shown.bs.modal', () => (loader.style.display = 'none'))
-        .on('hide.bs.modal', stopAllMedia)
-        .on('hidden.bs.modal', () => {
-          removeSwipeListeners();
-          stopAllMedia();
-          document.getElementById('mediaModal').innerHTML = '';
-        });
-
-      document.getElementById('search-input').addEventListener('input', function () {
-        searchText = this.value.trim();
-        filteredData = filterData(data, searchText);
-        currentPage = 1;
-        totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
-        renderItems();
-        renderPagination();
-        document.getElementById('empty-state').style.display = filteredData.length ? 'none' : 'block';
-      });
-
-      function filterData(arr, q) {
-        if (!q) return arr.slice();
-        const s = q.toLowerCase();
-        return arr.filter((item) => {
-          const t = (item.videoTitle || '').toLowerCase();
-          const sum = (item.summary || '').toLowerCase();
-          const tr = (item.transcriptionContent || '').toLowerCase();
-          return t.includes(s) || sum.includes(s) || tr.includes(s);
-        });
-      }
-
-      function renderItems() {
-        const itemsContainer = document.getElementById('items-container');
-        itemsContainer.innerHTML = '';
-
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const itemsToShow = filteredData.slice(startIndex, endIndex);
-
-        itemsToShow.forEach((item, i) => {
-          const col = document.createElement('div');
-          col.className = 'col-12 col-sm-6 col-lg-4 mb-4';
-          col.role = 'listitem';
-
-          const card = document.createElement('div');
-          card.className = 'video-card h-100';
-          card.setAttribute('tabindex', '0'); // Accessibility
-          card.setAttribute('aria-label', 'Ver ' + (item.videoTitle || 'Video'));
-          // Add enter key listener for accessibility
-          card.addEventListener('keydown', (e) => {
-             if(e.key === 'Enter') openMediaModal(filteredData[startIndex + i], startIndex + i);
-          });
-          card.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openMediaModal(filteredData[startIndex + i], startIndex + i);
-          });
-
-          const thumb = document.createElement('div');
-          thumb.className = 'video-thumb';
-
-          const img = document.createElement('img');
-          img.loading = 'lazy';
-          img.src = USE_SYNTH_THUMBS
-            ? generateThumb(item.videoTitle || item.name)
-            : (item.thumbnailLink || generateThumb(item.videoTitle || item.name));
-          img.alt = ''; // Alt empty as card has label
-          img.onerror = () => { img.src = generateThumb(item.videoTitle || item.name); };
-
-          const badge = document.createElement('div');
-          badge.className = 'play-badge';
-          badge.innerHTML = '<i class="fa-solid fa-play"></i><span>Reproducir</span>';
-
-          thumb.appendChild(img);
-          thumb.appendChild(badge);
-
-          const body = document.createElement('div');
-          body.className = 'card-body-custom';
-
-          const title = document.createElement('div');
-          title.className = 'video-title';
-          title.textContent = item.videoTitle || 'Sin título';
-
-          const small = document.createElement('div');
-          small.className = 'video-summary text-truncate';
-          const s = item.summary || '';
-          small.textContent = s.length > 100 ? s.slice(0, 100) + '…' : s;
-
-          body.appendChild(title);
-          body.appendChild(small);
-
-          card.appendChild(thumb);
-          card.appendChild(body);
-          col.appendChild(card);
-          itemsContainer.appendChild(col);
-        });
-      }
-
-      function renderPagination() {
-        const pag = document.getElementById('pagination');
-        pag.innerHTML = '';
-
-        const addBtn = (label, disabled, onClick, srText) => {
-          const li = document.createElement('li');
-          li.className = 'page-item' + (disabled ? ' disabled' : '');
-          const a = document.createElement('a');
-          a.className = 'page-link';
-          a.href = '#';
-          a.innerHTML = srText ? `<span class="sr-only">${srText}</span>${label}` : label;
-          a.addEventListener('click', (e) => { e.preventDefault(); if (!disabled) onClick(); });
-          li.appendChild(a);
-          pag.appendChild(li);
-        };
-
-        addBtn('<i class="fa-solid fa-chevron-left"></i>', currentPage === 1, () => { currentPage = 1; renderItems(); renderPagination(); }, 'Primera');
-        
-        // Simpler pagination for clarity
-        let startP = Math.max(1, currentPage - 1);
-        let endP = Math.min(totalPages, currentPage + 1);
-        
-        for (let p = startP; p <= endP; p++) {
-          const li = document.createElement('li');
-          li.className = 'page-item' + (p === currentPage ? ' active' : '');
-          const a = document.createElement('a');
-          a.className = 'page-link';
-          a.href = '#';
-          a.textContent = p;
-          a.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentPage !== p) { currentPage = p; renderItems(); renderPagination(); }
-          });
-          li.appendChild(a);
-          pag.appendChild(li);
-        }
-        addBtn('<i class="fa-solid fa-chevron-right"></i>', currentPage === totalPages, () => { currentPage = totalPages; renderItems(); renderPagination(); }, 'Última');
-      }
-
-      function renderMarkdown(text) {
-        if (!text) return '';
-        const fixed = text.replace(/INSS/g, 'IMSS');
-        marked.setOptions({ headerIds: false, mangle: false, breaks: true });
-        const raw = marked.parse(fixed);
-        return DOMPurify.sanitize(raw, { USE_PROFILES: { html: true } });
-      }
-
-      /* Modal Construction - Improved structure */
-      function openMediaModal(item, index) {
-        currentItemIndex = index;
-        const modal = document.getElementById('mediaModal');
-        modal.innerHTML = '';
-
-        const dialog = document.createElement('div');
-        dialog.className = 'modal-dialog modal-dialog-centered';
-
-        const content = document.createElement('div');
-        content.className = 'modal-content position-relative';
-
-        // Arrows & Pills
-        const swipeIndic = document.createElement('div');
-        swipeIndic.className = 'swipe-indicator';
-        swipeIndic.innerHTML = `
-          <button type="button" class="arrow left-arrow" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
-          <button type="button" class="arrow right-arrow" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
-        `;
-        const pagePill = document.createElement('div');
-        pagePill.className = 'page-pill';
-        pagePill.id = 'pagePill';
-        pagePill.textContent = (index + 1) + ' / ' + filteredData.length;
-
-        // Header
-        const header = document.createElement('div');
-        header.className = 'modal-header';
-        
-        const titleWrap = document.createElement('div');
-        titleWrap.style.overflow = "hidden";
-        titleWrap.style.marginRight = "10px";
-        
-        const title = document.createElement('h5');
-        title.className = 'modal-title';
-        title.textContent = item.videoTitle || item.name || 'Contenido';
-        titleWrap.appendChild(title);
-
-        const actions = document.createElement('div');
-        actions.className = 'modal-actions';
-        const sizeBtn = document.createElement('button');
-        sizeBtn.className = 'a11y-btn mr-2';
-        sizeBtn.type = 'button';
-        sizeBtn.title = 'Aumentar Texto';
-        sizeBtn.innerHTML = '<i class="fa-solid fa-text-height"></i> +';
-        sizeBtn.addEventListener('click', () => {
-          const mdNode = document.querySelector('.sheet-scroller .md');
-          if (!mdNode) return;
-          const curr = parseFloat(getComputedStyle(mdNode).fontSize);
-          const next = Math.min(curr + 2, 32); // Max 32px
-          mdNode.style.fontSize = next + 'px';
-        });
-
-        const closeBtn = document.createElement('button');
-        closeBtn.type = 'button';
-        closeBtn.className = 'close text-white';
-        closeBtn.style.opacity = '1';
-        closeBtn.setAttribute('data-dismiss','modal');
-        closeBtn.innerHTML = '<i class="fa-solid fa-xmark" style="font-size:24px;"></i>';
-
-        actions.appendChild(sizeBtn);
-        actions.appendChild(closeBtn);
-        header.appendChild(titleWrap);
-        header.appendChild(actions);
-
-        // Body
-        const bodyWrap = document.createElement('div');
-        bodyWrap.className = 'modal-body-wrapper';
-
-        const videoArea = document.createElement('div');
-        videoArea.className = 'video-area';
-        const iframe = document.createElement('iframe');
-        iframe.src = ensureYTApi(item.embedUrl);
-        iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
-        iframe.allowFullscreen = true;
-        iframe.title = item.videoTitle;
-        videoArea.appendChild(iframe);
-
-        // Call to actions
-        const ctaRow = document.createElement('div');
-        ctaRow.className = 'cta-row d-grid';
-        ctaRow.style.display = 'grid'; 
-        ctaRow.style.gridTemplateColumns = '1fr 1fr';
-        
-        const ctaResumen = document.createElement('button');
-        ctaResumen.className = 'cta cta-primary';
-        ctaResumen.type = 'button';
-        ctaResumen.innerHTML = '<i class="fa-solid fa-align-left mr-2"></i>Leer Resumen';
-        
-        const ctaPlay = document.createElement('button');
-        ctaPlay.className = 'cta cta-secondary';
-        ctaPlay.type = 'button';
-        ctaPlay.innerHTML = '<i class="fa-solid fa-play mr-2"></i>Video';
-        
-        ctaResumen.addEventListener('click', () => expandSheet(true));
-        ctaPlay.addEventListener('click', () => tryPlay(iframe));
-
-        ctaRow.appendChild(ctaResumen);
-        ctaRow.appendChild(ctaPlay);
-
-        // Bottom Sheet
-        const sheet = document.createElement('div');
-        sheet.className = 'sheet';
-        sheet.setAttribute('data-expanded','false');
-
-        const handle = document.createElement('div');
-        handle.className = 'sheet-handle d-flex justify-content-between align-items-center';
-        handle.innerHTML = `
-          <div class="d-flex align-items-center">
-            <div class="sheet-title d-flex align-items-center gap-2">
-               <span class="dot" style="width:10px;height:10px;border-radius:50%;margin-right:8px;"></span>
-               RESUMEN Y PUNTOS CLAVE
+          <!-- Header -->
+          <div class="modal-header">
+            <div style="overflow: hidden; margin-right: 10px;">
+              <h5 class="modal-title">{{ selectedItem.videoTitle || selectedItem.name || 'Contenido' }}</h5>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="a11y-btn mr-2" title="Aumentar Texto" @click="increaseFontSize">
+                <i class="fa-solid fa-text-height"></i> +
+              </button>
+              <button type="button" class="close text-white" style="opacity: 1;" @click="closeModal">
+                <i class="fa-solid fa-xmark" style="font-size:24px;"></i>
+              </button>
             </div>
           </div>
-          <i class="fa-solid fa-chevron-up"></i>
-        `;
 
-        const scroller = document.createElement('div');
-        scroller.className = 'sheet-scroller';
+          <!-- Body wrapper -->
+          <div class="modal-body-wrapper position-relative h-100 overflow-hidden d-flex flex-column">
+            
+            <div class="video-area">
+              <iframe 
+                ref="ytIframe"
+                :src="ensureYTApi(selectedItem.embedUrl)" 
+                allow="autoplay; encrypted-media; picture-in-picture" 
+                allowfullscreen
+                :title="selectedItem.videoTitle">
+              </iframe>
+            </div>
 
-        const md = document.createElement('div');
-        md.className = 'md';
-        const resumenSource = (item.summary && item.summary.trim().length) ? item.summary : (item.transcriptionContent || '— No hay resumen disponible —');
-        md.innerHTML = renderMarkdown(resumenSource);
+            <div class="cta-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <button class="cta cta-primary" type="button" @click="expandSheet(true)">
+                <i class="fa-solid fa-align-left mr-2"></i>Leer Resumen
+              </button>
+              <button class="cta cta-secondary" type="button" @click="tryPlay">
+                <i class="fa-solid fa-play mr-2"></i>Video
+              </button>
+            </div>
 
-        scroller.appendChild(md);
-        sheet.appendChild(handle);
-        sheet.appendChild(scroller);
+            <!-- Bottom Sheet -->
+            <div 
+              class="sheet" 
+              :class="{ expanded: isSheetExpanded }"
+              :style="sheetStyle"
+            >
+              <div class="sheet-handle d-flex justify-content-between align-items-center" @click="toggleSheet">
+                <div class="d-flex align-items-center">
+                  <div class="sheet-title d-flex align-items-center gap-2">
+                     <span class="dot" style="width:10px;height:10px;border-radius:50%;margin-right:8px;"></span>
+                     RESUMEN Y PUNTOS CLAVE
+                  </div>
+                </div>
+                <i class="fa-solid" :class="isSheetExpanded ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+              </div>
 
-        // Footer buttons (Regenerate)
-        const footer = document.createElement('div');
-        footer.className = 'modal-footer border-0 p-3 d-flex justify-content-between';
-        footer.style.background = 'var(--bg-body)';
-        
-        const regenBtn = document.createElement('button');
-        regenBtn.type = 'button';
-        regenBtn.className = 'btn btn-sm btn-outline-warning';
-        regenBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Mejorar Resumen';
-        regenBtn.addEventListener('click', () => regenerateSummary(item.id));
-        footer.appendChild(regenBtn);
+              <div class="sheet-scroller" ref="sheetScroller">
+                <div class="md" :style="{ fontSize: currentFontSize + 'px' }" v-html="renderMarkdown(currentSummaryContent)"></div>
+              </div>
 
-        bodyWrap.appendChild(videoArea);
-        bodyWrap.appendChild(ctaRow);
-        bodyWrap.appendChild(sheet);
-        
-        content.appendChild(swipeIndic);
-        content.appendChild(pagePill);
-        content.appendChild(header);
-        content.appendChild(bodyWrap);
-        // content.appendChild(footer); // Optional: add footer back if regeneration needed
+              <!-- Footer Buttons Inside Sheet -->
+              <div class="modal-footer border-0 p-3 d-flex justify-content-between" style="background: var(--bg-body);">
+                <button type="button" class="btn btn-sm btn-outline-warning" @click="regenerateSummary(selectedItem.id)">
+                  <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Mejorar Resumen
+                </button>
+              </div>
 
-        dialog.appendChild(content);
-        modal.appendChild(dialog);
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
+</template>
 
-        $('#mediaModal').modal('show');
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue';
+import { useFetch, useHead } from '#imports';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
-        $('#mediaModal').one('shown.bs.modal', () => {
-          addSwipeListeners();
-          setupSheet(sheet, handle);
-        });
+// Data fetching natively managed by Nuxt via Server API internally
+const { data: pageData, pending } = await useFetch('/api/page-data');
 
-        // Animations
-        content.classList.add('slide-in-right');
-        setTimeout(() => content.classList.remove('slide-in-right'), 400);
+// Base config
+const USE_SYNTH_THUMBS = true;
+const thumbCache = new Map();
 
-        function expandSheet(focusTop=false){
-          sheet.classList.add('expanded');
-          sheet.style.transform = "translateY(0%)";
-          sheet.setAttribute('data-expanded','true');
-          const icon = handle.querySelector('.fa-chevron-up');
-          if (icon) icon.className = 'fa-solid fa-chevron-down';
-          if (focusTop) scroller.scrollTop = 0;
-        }
+// Local State
+const searchText = ref('');
+const currentPage = ref(1);
+const itemsPerPage = 6;
+const currentItemIndex = ref(null);
+const isSheetExpanded = ref(false);
+const animationClass = ref('');
+const ytIframe = ref(null);
+const sheetScroller = ref(null);
+const currentFontSize = ref(20);
+
+// Set SEO Meta correctly for current deployment
+useHead(() => {
+  const latestItem = (pageData.value && pageData.value.length > 0) ? pageData.value[0] : null;
+  return {
+    title: latestItem ? latestItem.videoTitle : 'Programa de Formación Casita del Saber',
+    meta: [
+      { name: 'description', content: latestItem ? latestItem.summary : 'Descripción del último resumen' },
+      { property: 'og:title', content: latestItem ? latestItem.videoTitle : 'Programa de Formación Casita del Saber' },
+      { property: 'og:description', content: latestItem ? latestItem.summary : 'Descripción del último resumen' },
+      { property: 'og:image', content: latestItem ? latestItem.thumbnailLink : '/img/IECS-FULL.png' },
+    ]
+  };
+});
+
+// Computed filtering mapped identically from original vanilla logic
+const filteredData = computed(() => {
+  if (!pageData.value) return [];
+  const query = searchText.value.toLowerCase().trim();
+  if (!query) return pageData.value;
+  
+  return pageData.value.filter(item => {
+    const t = (item.videoTitle || '').toLowerCase();
+    const sum = (item.summary || '').toLowerCase();
+    const tr = (item.transcriptionContent || '').toLowerCase();
+    return t.includes(query) || sum.includes(query) || tr.includes(query);
+  });
+});
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredData.value.length / itemsPerPage)));
+
+const visiblePages = computed(() => {
+  const startP = Math.max(1, currentPage.value - 1);
+  const endP = Math.min(totalPages.value, currentPage.value + 1);
+  const pages = [];
+  for (let p = startP; p <= endP; p++) pages.push(p);
+  return pages;
+});
+
+const paginatedData = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return filteredData.value.slice(start, start + itemsPerPage);
+});
+
+// Watchers mapped from EJS
+watch(searchText, () => {
+  currentPage.value = 1;
+});
+
+const selectedItem = computed(() => {
+  if (currentItemIndex.value === null) return null;
+  return filteredData.value[currentItemIndex.value];
+});
+
+const currentSummaryContent = computed(() => {
+  if (!selectedItem.value) return '';
+  const item = selectedItem.value;
+  return (item.summary && item.summary.trim().length) ? item.summary : (item.transcriptionContent || '— No hay resumen disponible —');
+});
+
+// Thumbnails
+const generateThumbCanvas = (title) => {
+  if (import.meta.server) return ''; // Only run in browser
+  
+  const key = (title || 'Conferencia').trim() || 'Conferencia';
+  if (thumbCache.has(key)) return thumbCache.get(key);
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = 640, H = 360;
+  const canvas = document.createElement('canvas');
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const palettes = [
+    ['#0f172a', '#1e293b'], ['#1e1b4b', '#312e81'], ['#022c22', '#115e59'], 
+    ['#3a0ca3', '#480ca8'], ['#450a0a', '#7f1d1d'], ['#172554', '#1e40af']
+  ];
+  
+  let h = 0; for(let i=0; i<key.length; i++){h=(h<<5)-h+key.charCodeAt(i);h|=0;}
+  const pal = palettes[Math.abs(h) % palettes.length];
+
+  const grd = ctx.createLinearGradient(0,0,W,H);
+  grd.addColorStop(0, pal[0]); grd.addColorStop(1, pal[1]);
+  ctx.fillStyle = grd; ctx.fillRect(0,0,W,H);
+
+  ctx.globalAlpha = 0.05; ctx.fillStyle = '#fff';
+  for(let i=0; i<W; i+=40) { ctx.fillRect(i, 0, 1, H); }
+  for(let i=0; i<H; i+=40) { ctx.fillRect(0, i, W, 1); }
+  ctx.globalAlpha = 1;
+
+  const cx = W - 60, cy = H - 60, r = 30;
+  ctx.fillStyle = 'rgba(255,255,255,0.1)'; 
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.beginPath();
+  ctx.moveTo(cx-6, cy-10); ctx.lineTo(cx-6, cy+10); ctx.lineTo(cx+12, cy); ctx.fill();
+
+  const pad = 40, boxW = W - pad*2, maxLines = 3;
+  let fontSize = 42;
+  ctx.textBaseline = 'top';
+  
+  const wrapLines = (ctx, text, maxWidth, mxLines) => {
+    const words = text.split(/\s+/); const lines=[]; let curr='';
+    for (let i=0;i<words.length;i++){
+      const test = curr ? curr+' '+words[i] : words[i];
+      if (ctx.measureText(test).width <= maxWidth) curr = test;
+      else { if (curr) lines.push(curr); curr = words[i]; if (lines.length === mxLines-1) break; }
+    }
+    if (curr && lines.length < mxLines) lines.push(curr);
+    let truncated = (lines.join(' ') !== text);
+    if (lines.length === mxLines){
+      while (ctx.measureText(lines[lines.length-1] + '…').width > maxWidth && lines[lines.length-1].length) {
+        lines[lines.length-1] = lines[lines.length-1].slice(0,-1);
       }
+      lines[lines.length-1] += '…';
+    }
+    return {lines, truncated};
+  };
 
-      function ensureYTApi(url){
-        try{
-          if (!url) return '';
-          const u = new URL(url, window.location.href);
-          if ((u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) && !u.searchParams.has('enablejsapi')) {
-            u.searchParams.set('enablejsapi','1');
-          }
-          return u.toString();
-        } catch { return url; }
-      }
+  ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+  let wrapped = wrapLines(ctx, key, boxW, maxLines);
+  while (wrapped.truncated && fontSize > 24) {
+    fontSize -= 2;
+    ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+    wrapped = wrapLines(ctx, key, boxW, maxLines);
+  }
 
-      function tryPlay(iframe){
-        try {
-          iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}','*');
-        } catch {}
-      }
+  const textH = wrapped.lines.length * (fontSize * 1.25);
+  const textY = (H - textH) / 2;
+  ctx.shadowColor="rgba(0,0,0,0.5)"; ctx.shadowBlur=20;
+  ctx.fillStyle = '#ffffff';
+  wrapped.lines.forEach((ln, i) => ctx.fillText(ln, pad, textY + i*(fontSize*1.25)));
+  ctx.shadowBlur=0;
 
-      // Rest of the logic (Swipe, Animation, API calls) preserved 1:1
-      
-      function updateModalContent(item) {
-        const content = document.querySelector('#mediaModal .modal-content');
-        const title = content.querySelector('.modal-title');
-        const iframe = content.querySelector('.video-area iframe');
-        const pagePill = content.querySelector('#pagePill');
-        const md = content.querySelector('.sheet-scroller .md');
+  const url = canvas.toDataURL('image/jpeg', 0.9);
+  thumbCache.set(key, url);
+  return url;
+};
 
-        try { iframe.src = 'about:blank'; } catch(_) {}
-        title.textContent = item.videoTitle || item.name;
-        iframe.src = ensureYTApi(item.embedUrl);
-        pagePill.textContent = (currentItemIndex + 1) + ' / ' + filteredData.length;
+const getThumb = (item) => {
+  if (import.meta.server) return item.thumbnailLink || '';
+  return USE_SYNTH_THUMBS ? generateThumbCanvas(item.videoTitle || item.name) : (item.thumbnailLink || generateThumbCanvas(item.videoTitle || item.name));
+};
 
-        const resumenSource = (item.summary && item.summary.trim().length) ? item.summary : (item.transcriptionContent || '—');
-        md.innerHTML = renderMarkdown(resumenSource);
-      }
+const handleImageError = (item, event) => {
+  event.target.src = generateThumbCanvas(item.videoTitle || item.name);
+};
 
-      function stopAllMedia() {
-        const modal = document.getElementById('mediaModal');
-        const iframes = modal.querySelectorAll('iframe');
-        iframes.forEach(ifr => { try { ifr.src = 'about:blank'; } catch(_) {} });
-      }
+// UI Methods
+const goToPage = (p) => {
+  if (p >= 1 && p <= totalPages.value) {
+    currentPage.value = p;
+  }
+};
 
-      function regenerateSummary(videoId) {
-        // Preserved logic
-        Swal.fire({
-          title: 'Regenerar',
-          input: 'textarea',
-          inputLabel: 'Instrucciones para la IA',
-          inputValue: 'Resume en puntos clave detallados',
-          showCancelButton: true,
-          confirmButtonColor: '#fbbf24',
-          cancelButtonColor: '#334155',
-          confirmButtonText: 'Generar',
-          background: '#1e2330',
-          customClass: { title: 'text-white', content: 'text-white' }
-        }).then((res) => {
-          if (!res.value) return;
-          Swal.fire({ 
-            title: 'Generando…', 
-            background: '#1e2330', 
-            allowOutsideClick: false, 
-            didOpen: () => Swal.showLoading() 
-          });
-          fetch('/regenerate-summary', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ videoId, prompt: res.value })
-          })
-          .then(r => r.json())
-          .then(payload => {
-            const ix = data.findIndex(d => d.id === videoId);
-            if (ix !== -1) data[ix].summary = payload.summary;
+const formatSummary = (s) => {
+  s = s || '';
+  return s.length > 100 ? s.slice(0, 100) + '…' : s;
+};
 
-            const current = filteredData[currentItemIndex];
-            if (current && current.id === videoId) {
-              const md = document.querySelector('.sheet-scroller .md');
-              if (md) md.innerHTML = renderMarkdown(payload.summary);
-            }
-            Swal.close();
-            Swal.fire({ icon: 'success', title: 'Listo', background: '#1e2330', timer: 1200, showConfirmButton: false });
-          })
-          .catch(() => Swal.fire({ icon: 'error', title: 'Error', background: '#1e2330' }));
-        });
-      }
+const renderMarkdown = (text) => {
+  if (!text) return '';
+  const fixed = text.replace(/INSS/g, 'IMSS');
+  marked.setOptions({ headerIds: false, mangle: false, breaks: true });
+  const raw = marked.parse(fixed);
+  if (import.meta.server) return raw; // Server just renders raw mapped elements
+  return DOMPurify.sanitize(raw, { USE_PROFILES: { html: true } });
+};
 
-      // Swipe Logic
-      let touchStartX = 0, touchEndX = 0;
-      let isAnimating = false;
+// Modal specific logic
+const openMediaModal = (index) => {
+  if(index < 0 || index >= filteredData.value.length) return;
+  currentItemIndex.value = index;
+  isSheetExpanded.value = false;
+  animationClass.value = 'slide-in-right';
+  setTimeout(() => { animationClass.value = ''; }, 400);
+};
 
-      function addSwipeListeners() {
-        const content = document.querySelector('#mediaModal .modal-content');
-        if(!content) return;
-        content.addEventListener('touchstart', onTouchStart, { passive: true });
-        content.addEventListener('touchend', onTouchEnd, { passive: true });
+const closeModal = () => {
+  currentItemIndex.value = null;
+  isSheetExpanded.value = false;
+};
 
-        const leftArrow = content.querySelector('.left-arrow');
-        const rightArrow = content.querySelector('.right-arrow');
-        leftArrow.addEventListener('click', () => navigatePrev());
-        rightArrow.addEventListener('click', () => navigateNext());
-      }
-      function removeSwipeListeners() {
-        // Cleanup
-      }
-      function onTouchStart(e){ touchStartX = e.changedTouches[0].screenX; }
-      function onTouchEnd(e){
-        touchEndX = e.changedTouches[0].screenX;
-        if (Math.abs(touchEndX - touchStartX) > 50) { 
-          if (touchEndX < touchStartX) navigateNext('left'); else navigatePrev('right'); 
-        }
-      }
-      function navigateNext(dir='left'){
-        if (currentItemIndex == null || currentItemIndex >= filteredData.length - 1) return;
-        animateSwap(currentItemIndex + 1, dir);
-      }
-      function navigatePrev(dir='right'){
-        if (currentItemIndex == null || currentItemIndex <= 0) return;
-        animateSwap(currentItemIndex - 1, dir);
-      }
-      function animateSwap(newIndex, dir){
-        if (isAnimating) return;
-        isAnimating = true;
-        const content = document.querySelector('#mediaModal .modal-content');
-        
-        // CSS Animation classes needs to be defined in style
-        // For brevity reusing logic but ensure classes exist in CSS
-        content.style.opacity = '0';
-        content.style.transform = dir === 'left' ? 'translateX(-50px)' : 'translateX(50px)';
-        content.style.transition = 'all 0.2s ease';
+const increaseFontSize = () => {
+  currentFontSize.value = Math.min(currentFontSize.value + 2, 32);
+};
 
-        setTimeout(() => {
-          currentItemIndex = newIndex;
-          updateModalContent(filteredData[newIndex]);
-          
-          content.style.transform = dir === 'left' ? 'translateX(50px)' : 'translateX(-50px)';
-          setTimeout(() => {
-            content.style.opacity = '1';
-            content.style.transform = 'translateX(0)';
-            isAnimating = false;
-          }, 50);
-        }, 200);
-      }
+const toggleSheet = () => {
+  isSheetExpanded.value = !isSheetExpanded.value;
+};
 
-      function setupSheet(sheet, handle) {
-        const icon = handle.querySelector('.fa-chevron-up');
-        
-        // Sheet logic (Mobile only mostly)
-        // Basic toggle for click
-        handle.addEventListener('click', () => {
-          const isExpanded = sheet.classList.contains('expanded');
-          if(isExpanded) {
-            sheet.classList.remove('expanded');
-            sheet.style.transform = "translateY(calc(100% - var(--sheet-peek)))";
-            if(icon) icon.className = 'fa-solid fa-chevron-up';
-          } else {
-            sheet.classList.add('expanded');
-            sheet.style.transform = "translateY(0%)";
-            if(icon) icon.className = 'fa-solid fa-chevron-down';
-          }
-        });
-        
-        // Initial state
-        sheet.style.position = 'absolute';
-        sheet.style.left = '0'; sheet.style.right = '0'; sheet.style.bottom = '0';
-        sheet.style.height = 'var(--sheet-expanded)';
-        sheet.style.transform = "translateY(calc(100% - var(--sheet-peek)))";
-        sheet.style.transition = "transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)";
-        sheet.style.zIndex = "3";
-        
-        // Desktop override handled via CSS media query
-      }
+const expandSheet = (focusTop = false) => {
+  isSheetExpanded.value = true;
+  if (focusTop && sheetScroller.value) {
+    sheetScroller.value.scrollTop = 0;
+  }
+};
+
+const sheetStyle = computed(() => {
+  if (isSheetExpanded.value) return { transform: 'translateY(0%)' };
+  return { transform: 'translateY(calc(100% - var(--sheet-peek)))' };
+});
+
+const ensureYTApi = (url) => {
+  if (import.meta.server) return url || '';
+  try {
+    if (!url) return '';
+    const u = new URL(url, window.location.href);
+    if ((u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) && !u.searchParams.has('enablejsapi')) {
+      u.searchParams.set('enablejsapi', '1');
+    }
+    return u.toString();
+  } catch { return url; }
+};
+
+const tryPlay = () => {
+  try {
+    if (ytIframe.value) {
+      ytIframe.value.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+  } catch (e) {}
+};
+
+// Touch/Swipe Logic
+let touchStartX = 0, touchEndX = 0;
+let isAnimating = false;
+
+const onTouchStart = (e) => { touchStartX = e.changedTouches[0].screenX; };
+const onTouchEnd = (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  if (Math.abs(touchEndX - touchStartX) > 50) {
+    if (touchEndX < touchStartX) navigateNext('left'); else navigatePrev('right');
+  }
+};
+
+const navigateNext = (dir = 'left') => {
+  if (currentItemIndex.value == null || currentItemIndex.value >= filteredData.value.length - 1) return;
+  animateSwap(currentItemIndex.value + 1, dir);
+};
+const navigatePrev = (dir = 'right') => {
+  if (currentItemIndex.value == null || currentItemIndex.value <= 0) return;
+  animateSwap(currentItemIndex.value - 1, dir);
+};
+
+const animateSwap = (newIndex, dir) => {
+  if (isAnimating) return;
+  isAnimating = true;
+  
+  animationClass.value = dir === 'left' ? 'slide-out-left' : 'slide-out-right';
+  
+  setTimeout(() => {
+    currentItemIndex.value = newIndex;
+    isSheetExpanded.value = false;
+    animationClass.value = dir === 'left' ? 'slide-in-right' : 'slide-in-left';
+    
+    setTimeout(() => {
+      animationClass.value = '';
+      isAnimating = false;
+    }, 200);
+  }, 200);
+};
+
+// Summary Regeneration via API
+const regenerateSummary = async (videoId) => {
+  if (!window.Swal) return;
+  const res = await window.Swal.fire({
+    title: 'Regenerar',
+    input: 'textarea',
+    inputLabel: 'Instrucciones para la IA',
+    inputValue: 'Resume en puntos clave detallados',
+    showCancelButton: true,
+    confirmButtonColor: '#fbbf24',
+    cancelButtonColor: '#334155',
+    confirmButtonText: 'Generar',
+    background: '#1e2330',
+    customClass: { title: 'text-white', content: 'text-white' }
+  });
+
+  if (!res.value) return;
+
+  window.Swal.fire({ 
+    title: 'Generando…', 
+    background: '#1e2330', 
+    allowOutsideClick: false, 
+    didOpen: () => window.Swal.showLoading() 
+  });
+
+  try {
+    const response = await $fetch('/regenerate-summary', {
+      method: 'POST',
+      body: { videoId, prompt: res.value }
     });
-  </script>
-</body>
-</html>
+    
+    // Update local reactive datastore mapping
+    const originalItem = pageData.value.find(d => d.id === videoId);
+    if (originalItem) originalItem.summary = response.summary;
+    
+    window.Swal.fire({ icon: 'success', title: 'Listo', background: '#1e2330', timer: 1200, showConfirmButton: false });
+  } catch (error) {
+    window.Swal.fire({ icon: 'error', title: 'Error', background: '#1e2330' });
+  }
+};
+</script>
+
+<style>
+/* Exactly preserved structure mappings for pure identical UI behavior */
+:root {
+  --bg-body: #0b0d11;
+  --bg-surface: #151922;
+  --bg-surface-elevated: #1e2330;
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  --font-stack: 'Plus Jakarta Sans', sans-serif;
+  --accent: #fbbf24; 
+  --accent-glow: rgba(251, 191, 36, 0.3);
+  --accent-secondary: #38bdf8;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --shadow-card: 0 10px 40px -10px rgba(0,0,0,0.7);
+  --border-subtle: 1px solid rgba(255,255,255,0.08);
+  --sheet-peek: 84px;
+  --sheet-expanded: 70vh;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--bg-body);
+  background-image: radial-gradient(circle at 50% 0%, #1a202e 0%, var(--bg-body) 60%);
+  background-attachment: fixed;
+  font-family: var(--font-stack);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5 { letter-spacing: -0.02em; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.container-fluid { max-width: 1400px; padding-left: clamp(16px, 4vw, 32px); padding-right: clamp(16px, 4vw, 32px); }
+
+.brand-header { position: relative; padding: 40px 0 24px; }
+.brand-header img { height: 90px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5)); margin-bottom: 12px; }
+.brand-header h1 {
+  font-weight: 800; font-size: clamp(22px, 5vw, 36px);
+  background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.5); margin-top: 8px;
+}
+
+.search-wrap {
+  position: sticky; top: 0; z-index: 100; padding: 10px 0 24px;
+  background: linear-gradient(180deg, var(--bg-body) 0%, rgba(11,13,17,0.95) 50%, rgba(11,13,17,0) 100%);
+  backdrop-filter: blur(2px); pointer-events: none;
+}
+.search-wrap > div { pointer-events: auto; }
+.search-input {
+  background: rgba(30, 35, 48, 0.7); border: var(--border-subtle); backdrop-filter: blur(12px);
+  color: #fff; border-radius: 99px; padding: 18px 24px; font-size: 1.1rem; font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: all 0.3s ease;
+}
+.search-input:focus {
+  background: #1e2330; box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 2px var(--accent);
+  color: #fff; outline: none;
+}
+.search-input::placeholder { color: var(--text-muted); opacity: 0.8; }
+.search-icon { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 1.25rem; pointer-events: none; }
+
+.video-card {
+  position: relative; background: var(--bg-surface); border: var(--border-subtle); border-radius: var(--radius-md);
+  overflow: hidden; cursor: pointer; box-shadow: var(--shadow-card); transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.25s ease;
+  height: 100%; display: flex; flex-direction: column;
+}
+.video-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px -10px rgba(0,0,0,0.8); border-color: rgba(255,255,255,0.2); }
+.video-card:active { transform: scale(0.98); }
+
+.video-thumb { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; overflow: hidden; }
+.video-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; opacity: 0.9; }
+.video-card:hover .video-thumb img { transform: scale(1.05); opacity: 1; }
+
+.play-badge {
+  position: absolute; right: 12px; bottom: 12px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 99px; color: #fff; font-weight: 700;
+  font-size: 0.9rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.play-badge i { color: var(--accent); }
+
+.card-body-custom { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+.video-title { font-weight: 700; font-size: 1.15rem; line-height: 1.35; color: #fff; margin-bottom: 8px; }
+.video-summary { font-size: 1rem; color: var(--text-muted); line-height: 1.5; }
+
+.pagination .page-item { margin: 0 4px; }
+.pagination .page-link {
+  background: var(--bg-surface-elevated); border: var(--border-subtle); color: var(--text-muted);
+  border-radius: 12px !important; font-weight: 700; padding: 12px 18px; font-size: 1.05rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.pagination .page-item.active .page-link { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+.pagination .page-item.disabled .page-link { opacity: 0.3; }
+
+.modal-content { background: var(--bg-body); border-radius: 0; height: 100vh; border: none; transition: all 0.2s ease; }
+.modal-header { background: rgba(11, 13, 17, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px 20px; z-index: 10; }
+.modal-title { font-weight: 800; font-size: 1.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a11y-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 14px; border-radius: 12px; font-weight: 700; transition: background 0.2s; }
+.a11y-btn:active { background: rgba(255,255,255,0.2); }
+
+.modal-body-wrapper { background: var(--bg-body); flex: 1; }
+.video-area { background: #000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 100%; aspect-ratio: 16/9; }
+.video-area iframe { width: 100%; height: 100%; display: block; }
+
+.cta-row { padding: 20px; gap: 16px; }
+.cta { border: none; border-radius: 16px; padding: 18px; font-weight: 800; font-size: 1.1rem; letter-spacing: 0.02em; text-transform: uppercase; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: transform 0.1s; }
+.cta:active { transform: scale(0.97); }
+.cta-primary { background: var(--accent); color: #1a1500; box-shadow: 0 0 20px var(--accent-glow); }
+.cta-secondary { background: var(--bg-surface-elevated); border: 1px solid rgba(255,255,255,0.1); color: #fff; }
+
+.sheet { background: var(--bg-surface-elevated); border-top: 1px solid rgba(255,255,255,0.1); border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg); box-shadow: 0 -10px 40px rgba(0,0,0,0.6); position: absolute; left: 0; right: 0; bottom: 0; height: var(--sheet-expanded); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 3; display: flex; flex-direction: column; }
+.sheet-handle { background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.03); padding: 14px 24px; cursor: pointer; }
+.sheet-title { font-size: 1.1rem; color: #fff; }
+.sheet-title .dot { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.sheet-scroller { padding: 20px 24px 120px; overflow-y: auto; flex: 1; }
+
+.md { line-height: 1.7; color: #e2e8f0; transition: font-size 0.2s; }
+.md h1, .md h2, .md h3 { color: #fff; margin-top: 1.2em; margin-bottom: 0.6em; }
+.md p { margin-bottom: 1.2em; }
+.md strong { color: var(--accent); }
+.md blockquote { border-left: 4px solid var(--accent); background: rgba(251, 191, 36, 0.05); padding: 16px; border-radius: 8px; font-style: italic; color: #fff; }
+.md ul li { margin-bottom: 0.5em; list-style-type: square; }
+
+.swipe-indicator { position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); display: flex; justify-content: space-between; padding: 0 16px; pointer-events: none; z-index: 20; }
+.swipe-indicator .arrow { background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); width: 56px; height: 56px; font-size: 1.4rem; pointer-events: auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+.swipe-indicator .arrow:active { background: var(--accent); color: #000; }
+.page-pill { position: absolute; bottom: calc(var(--sheet-peek) + 16px); left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 20px; padding: 6px 16px; z-index: 10; font-variant-numeric: tabular-nums; }
+
+.slide-in-right { transform: translateX(50px); opacity: 0; animation: slideInR 0.2s forwards; }
+.slide-in-left { transform: translateX(-50px); opacity: 0; animation: slideInL 0.2s forwards; }
+.slide-out-right { transform: translateX(50px); opacity: 0; transition: all 0.2s; }
+.slide-out-left { transform: translateX(-50px); opacity: 0; transition: all 0.2s; }
+
+@keyframes slideInR { to { transform: translateX(0); opacity: 1; } }
+@keyframes slideInL { to { transform: translateX(0); opacity: 1; } }
+
+@media (min-width: 992px) {
+  .modal-dialog { max-width: 1200px; height: 90vh; margin: 5vh auto; }
+  .modal-content { border-radius: 24px; height: 100%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+  .sheet { background: var(--bg-surface); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; position: relative; height: auto; transform: none !important; margin: 0 20px 20px; flex: 1; }
+  .sheet-handle i { display: none; }
+  .sheet-scroller { padding-bottom: 40px; }
+  .video-area { border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); margin: 20px; }
+  .cta-row { padding: 0 20px 20px; }
+  .page-pill { bottom: 20px; left: auto; right: 20px; transform: none; }
+}
+
+#loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+</style>
