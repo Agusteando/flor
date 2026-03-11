@@ -1,0 +1,6 @@
+name: FLOR
+script: ./server.js
+watch: ['./server.js']
+env:
+  NODE_ENV: production
+  PORT: 2345
