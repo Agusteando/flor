@@ -49,6 +49,8 @@ export default defineEventHandler(async () => {
           thumbnailLink: file.thumbnailLink || '',
           embedUrl: embedUrl,
           googleFileId: file.id,
+          // Extract createdTime for compilation page usage
+          createdTime: file.createdTime || new Date().toISOString()
         };
       }
       return null;

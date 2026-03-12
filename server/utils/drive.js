@@ -33,7 +33,8 @@ export async function fetchFiles(folderId) {
     includeItemsFromAllDrives: true,
     supportsAllDrives: true,
     corpora: 'allDrives',
-    fields: 'nextPageToken, files(id, name, thumbnailLink)',
+    // Added 'createdTime' to the fields array
+    fields: 'nextPageToken, files(id, name, thumbnailLink, createdTime)',
     spaces: 'drive',
   });
 
