@@ -31,10 +31,15 @@
             />
           </div>
           
-          <!-- NEW: Export / Compilation Button -->
           <div class="mt-3">
              <NuxtLink to="/export" class="action-btn text-btn w-100 justify-content-center" style="background: var(--accent-light); color: var(--accent); text-decoration: none;">
                <i class="fa-solid fa-layer-group mr-2"></i> Compilar Resúmenes
+             </NuxtLink>
+          </div>
+
+          <div class="mt-2">
+             <NuxtLink to="/textos" class="action-btn text-btn w-100 justify-content-center" style="background: #F8FAFC; color: var(--text-main); border: 1px solid var(--border-color); text-decoration: none;">
+               <i class="fa-solid fa-file-lines mr-2"></i> Textos para copiar
              </NuxtLink>
           </div>
         </div>

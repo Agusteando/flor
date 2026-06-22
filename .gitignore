@@ -260,3 +260,9 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/git,node,vue,macos,linux,windows,visualstudiocode
+
+# Local Google service account key
+credentials.json
+
+# Nuxt server build output
+.output

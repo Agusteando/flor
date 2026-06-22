@@ -29,11 +29,12 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     dbHost: process.env.DB_HOST || 'localhost',
-    dbUser: process.env.DB_USER || 'root',
-    dbPass: process.env.DB_PASSWORD || 'Nicole10*',
-    dbName: process.env.DB_NAME || 'casitaiedis',
-    openaiApiKey: process.env.OPENAI_API_KEY,
-    googleClientEmail: process.env.GOOGLE_CLIENT_EMAIL,
-    googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY
+    dbPort: process.env.DB_PORT || '3306',
+    dbUser: process.env.DB_USER || '',
+    dbPass: process.env.DB_PASSWORD || '',
+    dbName: process.env.DB_NAME || '',
+    openaiApiKey: process.env.OPENAI_API_KEY || '',
+    googleClientEmail: process.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '',
+    googlePrivateKeyBase64: process.env.GOOGLE_PRIVATE_KEY_BASE64 || ''
   }
 });

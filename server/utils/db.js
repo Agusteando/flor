@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise';
+import { envValue } from './env.js';
 
 let pool;
 
@@ -9,10 +10,11 @@ export const getPool = () => {
   const config = useRuntimeConfig();
   
   pool = mysql.createPool({
-    host: config.dbHost,
-    user: config.dbUser,
-    password: config.dbPass,
-    database: config.dbName,
+    host: envValue('DB_HOST', config.dbHost),
+    port: Number(envValue('DB_PORT', config.dbPort || '3306')),
+    user: envValue('DB_USER', config.dbUser),
+    password: envValue('DB_PASSWORD', config.dbPass),
+    database: envValue('DB_NAME', config.dbName),
     supportBigNumbers: true,
     bigNumberStrings: true,
   });
