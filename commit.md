@@ -1,1 +1,1 @@
-Corrige resolución pública de dependencias npm
+Añade API pública para gestionar contenido de conferencias

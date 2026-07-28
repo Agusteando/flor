@@ -34,7 +34,9 @@ export default defineNuxtConfig({
     dbPass: process.env.DB_PASSWORD || '',
     dbName: process.env.DB_NAME || '',
     openaiApiKey: process.env.OPENAI_API_KEY || '',
+    contentApiWriteKey: process.env.CONTENT_API_WRITE_KEY || '',
     googleClientEmail: process.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '',
-    googlePrivateKeyBase64: process.env.GOOGLE_PRIVATE_KEY_BASE64 || ''
+    googlePrivateKeyBase64: process.env.GOOGLE_PRIVATE_KEY_BASE64 || '',
+    googleTranscriptsFolderId: process.env.GOOGLE_TRANSCRIPTS_FOLDER_ID || ''
   }
 });

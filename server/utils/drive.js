@@ -1,9 +1,14 @@
 import { google } from 'googleapis';
 import { envValue } from './env.js';
 
-const DRIVE_READONLY_SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
+const DRIVE_SCOPES = [
+  'https://www.googleapis.com/auth/drive',
+  'https://www.googleapis.com/auth/documents',
+];
 
+let googleAuth;
 let driveClient;
+let docsClient;
 
 function normalizePrivateKey(raw) {
   const value = String(raw || '').trim();
@@ -59,15 +64,29 @@ function streamToString(stream) {
 export async function getDriveClient() {
   if (driveClient) return driveClient;
 
-  const { clientEmail, privateKey } = getServiceAccountCredentials();
-  const auth = new google.auth.JWT({
-    email: clientEmail,
-    key: privateKey,
-    scopes: DRIVE_READONLY_SCOPES,
-  });
+  const auth = getGoogleAuth();
 
   driveClient = google.drive({ version: 'v3', auth });
   return driveClient;
+}
+
+function getGoogleAuth() {
+  if (googleAuth) return googleAuth;
+
+  const { clientEmail, privateKey } = getServiceAccountCredentials();
+  googleAuth = new google.auth.JWT({
+    email: clientEmail,
+    key: privateKey,
+    scopes: DRIVE_SCOPES,
+  });
+
+  return googleAuth;
+}
+
+function getDocsClient() {
+  if (docsClient) return docsClient;
+  docsClient = google.docs({ version: 'v1', auth: getGoogleAuth() });
+  return docsClient;
 }
 
 export async function fetchFiles(folderId) {
@@ -111,4 +130,115 @@ export async function readDriveText(value) {
     : await drive.files.get({ fileId, alt: 'media', supportsAllDrives: true }, { responseType: 'stream' });
 
   return streamToString(response.data);
+}
+
+async function replaceGoogleDocumentText(fileId, content) {
+  const docs = getDocsClient();
+  const document = await docs.documents.get({ documentId: fileId });
+  const bodyContent = document.data.body?.content || [];
+  const endIndex = bodyContent.reduce(
+    (maximum, element) => Math.max(maximum, Number(element.endIndex) || 0),
+    0
+  );
+  const requests = [];
+
+  if (endIndex > 2) {
+    requests.push({
+      deleteContentRange: {
+        range: {
+          startIndex: 1,
+          endIndex: endIndex - 1,
+        },
+      },
+    });
+  }
+
+  requests.push({
+    insertText: {
+      location: { index: 1 },
+      text: content,
+    },
+  });
+
+  await docs.documents.batchUpdate({
+    documentId: fileId,
+    requestBody: { requests },
+  });
+}
+
+export async function writeDriveText(value, content, { fileName, folderId } = {}) {
+  const existingFileId = extractDriveFileId(value);
+  const drive = await getDriveClient();
+
+  if (existingFileId) {
+    const metadata = await drive.files.get({
+      fileId: existingFileId,
+      fields: 'id, mimeType',
+      supportsAllDrives: true,
+    });
+    const mimeType = metadata.data.mimeType || '';
+
+    if (mimeType === 'application/vnd.google-apps.document') {
+      await replaceGoogleDocumentText(existingFileId, content);
+    } else {
+      if (mimeType.startsWith('application/vnd.google-apps')) {
+        throw new Error(`Unsupported Google Drive transcript type: ${mimeType}`);
+      }
+
+      await drive.files.update({
+        fileId: existingFileId,
+        media: {
+          mimeType: 'text/plain',
+          body: content,
+        },
+        supportsAllDrives: true,
+        fields: 'id',
+      });
+    }
+
+    return {
+      created: false,
+      fileId: existingFileId,
+      reference: String(value || '').trim() || `drive://${existingFileId}`,
+    };
+  }
+
+  const destinationFolderId = String(folderId || '').trim();
+  if (!destinationFolderId) {
+    throw new Error('GOOGLE_TRANSCRIPTS_FOLDER_ID is required to create a transcript.');
+  }
+
+  const response = await drive.files.create({
+    requestBody: {
+      name: fileName || 'conference-transcript.txt',
+      mimeType: 'text/plain',
+      parents: [destinationFolderId],
+    },
+    media: {
+      mimeType: 'text/plain',
+      body: content,
+    },
+    supportsAllDrives: true,
+    fields: 'id',
+  });
+  const fileId = response.data.id;
+
+  if (!fileId) {
+    throw new Error('Google Drive did not return a transcript file identifier.');
+  }
+
+  return {
+    created: true,
+    fileId,
+    reference: `drive://${fileId}`,
+  };
+}
+
+export async function deleteDriveFile(fileId) {
+  if (!fileId) return;
+  const drive = await getDriveClient();
+  await drive.files.delete({
+    fileId,
+    supportsAllDrives: true,
+  });
 }
